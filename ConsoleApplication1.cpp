@@ -194,6 +194,13 @@ void* tsp(void* arg)
     return NULL;
 }
 
+void* tsp_parallel(void* arg)
+{
+
+
+    return NULL;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -201,12 +208,13 @@ int main(int argc, char* argv[])
         std::cout << "Usage: " << argv[0] << " num_cities\n";
         exit(-1);
     }
-
     int NumCities = atoi(argv[1]);
     assert(NumCities <= MAXCITIES);
 
     Fill_Dist(NumCities);			// initialize Distance matrix
 
+    
+    // Config sequential TSP funtion.
     Path* P = new Path(NumCities);
     Queue Q;
     Q.Put(P);			// initialize Q with one zero-length path
@@ -216,6 +224,7 @@ int main(int argc, char* argv[])
 
     Params params = { NumCities, &Q, &Shortest };
 
+    // Run TSP sequentially.
     auto startTime = std::chrono::steady_clock::now();
     tsp(&params);
     auto endTime = std::chrono::steady_clock::now();
@@ -226,6 +235,29 @@ int main(int argc, char* argv[])
 
 
     std::cout << "TSP solution took " << ms.count() << " ms\n";
+
+    // Config sequential TSP funtion.
+    Path* P_parallel = new Path(NumCities);
+    // After the previous sequential manipulation, the Q is always empty, so we can reused. Creating a new queue will cause stack overflow due to the size of the queue is very big.
+    Q.Put(P_parallel);			// initialize Q with one zero-length path
+
+    Path Shortest_parallel(NumCities);
+    Shortest_parallel.length = INT_MAX;    // The initial Shortest path must be bad
+
+    Params params_parallel = { NumCities, &Q, &Shortest_parallel };
+
+
+    // Run TSP parallelly.
+    auto startTimeParallel = std::chrono::steady_clock::now();
+    tsp_parallel(&params_parallel);
+    auto endTimeParallel = std::chrono::steady_clock::now();
+    auto msParallel = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeParallel - startTimeParallel);
+
+    std::cout << "Shortest path (parallel):";
+    Shortest_parallel.Print();
+
+
+    std::cout << "TSP solution (parallel) took " << msParallel.count() << " ms\n";
     return 0;
 }
 

@@ -30,7 +30,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <chrono>
-
+#include <pthread.h>
 
 const int MAXCITIES = 20;
 
@@ -194,13 +194,36 @@ void* tsp(void* arg)
     return NULL;
 }
 
+
+void* tsp_parallel_one_thread(void* arg)
+{
+    std::cout << "thread created" << std::endl;
+    return NULL;
+}
+
 void* tsp_parallel(void* arg)
 {
+    Params* params = (Params*)arg;
+    int numCities = params->numCities;
+    Queue* Q = params->Q;
+    pthread_t threads[4];
 
+
+    for (int i = 0; i < 4; i += 1) {
+        pthread_create(&threads[i], NULL, tsp_parallel_one_thread, &Q);
+    }
+    
+    
+    int j = 0;
+    while (j < 1000000) {
+	    j += 1;
+    }
 
     return NULL;
 
 }
+
+
 
 int main(int argc, char* argv[])
 {
